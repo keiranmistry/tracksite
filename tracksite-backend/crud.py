@@ -40,6 +40,16 @@ def create_bookmark(db: Session, bookmark: schemas.BookmarkCreate):
     db.refresh(db_bookmark)
     return db_bookmark
 
+def update_bookmark(db: Session, bookmark_id: int, bookmark: schemas.BookmarkCreate):
+    db_bookmark = get_bookmark(db, bookmark_id)
+    if db_bookmark:
+        db_bookmark.title = bookmark.title
+        db_bookmark.url = bookmark.url
+        db_bookmark.folder_id = bookmark.folder_id
+        db.commit()
+        db.refresh(db_bookmark)
+    return db_bookmark
+
 def delete_bookmark(db: Session, bookmark_id: int):
     db_bookmark = get_bookmark(db, bookmark_id)
     if db_bookmark:

@@ -1,11 +1,13 @@
 
 import './App.css';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import About from './about.js';
 import Home from './Home.js';
 import Login from './login.js';
 import logo from './tracksitelogo.png';
 import App from './tracksite.js';
+import Tracksite from './tracksite';
 
 function Track() {
   return (
@@ -18,10 +20,9 @@ function Track() {
               <span>Tracksite</span> 
             </Link>
 
- 
             <nav className="nav-links">
-              <Link to="/App" className="nav-link">Folders</Link>
-              <div className="empty-container"></div>
+              <Link to="/" className="nav-link">Home</Link>
+              <Link to="/edit" className="nav-link">Edit</Link>
               <Link to="/about" className="nav-link">About</Link>
               <div className="empty-container"></div>
             </nav>
@@ -29,8 +30,8 @@ function Track() {
         </header>
 
         <Routes>
-          <Route path="/App" element={<App />} />
           <Route path="/" element={<Home />} />
+          <Route path="/edit" element={<Tracksite />} />
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
         </Routes>

@@ -1,11 +1,12 @@
 # schemas.py
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 from typing import List, Optional
+from datetime import datetime
 
 class BookmarkBase(BaseModel):
     title: str
-    url: HttpUrl
+    url: str
 
 class BookmarkCreate(BookmarkBase):
     folder_id: Optional[int] = None
@@ -13,6 +14,7 @@ class BookmarkCreate(BookmarkBase):
 class Bookmark(BookmarkBase):
     id: int
     folder_id: Optional[int]
+    created_at: datetime
 
     class Config:
          from_attributes = True
@@ -25,6 +27,7 @@ class FolderCreate(FolderBase):
 
 class Folder(FolderBase):
     id: int
+    created_at: datetime
     bookmarks: List[Bookmark] = []
 
     class Config:
