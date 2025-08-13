@@ -13,6 +13,7 @@ import os
 import shutil
 from pathlib import Path
 from pydantic import BaseModel
+import uuid
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -126,8 +127,12 @@ async def upload_file(
 ):
     """Upload a file and create a bookmark for it"""
     try:
+        # Generate unique filename to avoid conflicts
+        file_extension = Path(file.filename).suffix
+        unique_filename = f"{uuid.uuid4()}_{file.filename}"
+        
         # Save file
-        file_path = FILES_DIR / file.filename
+        file_path = FILES_DIR / unique_filename
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
@@ -147,7 +152,8 @@ async def upload_file(
         return {
             "message": "File uploaded successfully",
             "bookmark": db_bookmark,
-            "file_path": str(file_path)
+            "file_path": str(file_path),
+            "original_filename": file.filename
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
@@ -160,8 +166,12 @@ async def upload_application(
 ):
     """Upload an application and create a bookmark for it"""
     try:
+        # Generate unique filename to avoid conflicts
+        file_extension = Path(app_file.filename).suffix
+        unique_filename = f"{uuid.uuid4()}_{app_file.filename}"
+        
         # Save application
-        app_path = APPLICATIONS_DIR / app_file.filename
+        app_path = APPLICATIONS_DIR / unique_filename
         with open(app_path, "wb") as buffer:
             shutil.copyfileobj(app_file.file, buffer)
         
@@ -184,7 +194,8 @@ async def upload_application(
         return {
             "message": "Application uploaded successfully",
             "bookmark": db_bookmark,
-            "app_path": str(app_path)
+            "app_path": str(app_path),
+            "original_filename": app_file.filename
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Application upload failed: {str(e)}")
@@ -195,7 +206,11 @@ async def download_file(filename: str):
     file_path = FILES_DIR / filename
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(file_path, filename=filename)
+    
+    # Extract original filename from the stored filename
+    original_filename = filename.split('_', 1)[1] if '_' in filename else filename
+    
+    return FileResponse(file_path, filename=original_filename)
 
 @app.get("/applications/{filename}")
 async def download_application(filename: str):
@@ -203,7 +218,11 @@ async def download_application(filename: str):
     app_path = APPLICATIONS_DIR / filename
     if not app_path.exists():
         raise HTTPException(status_code=404, detail="Application not found")
-    return FileResponse(app_path, filename=filename)
+    
+    # Extract original filename from the stored filename
+    original_filename = filename.split('_', 1)[1] if '_' in filename else filename
+    
+    return FileResponse(app_path, filename=original_filename)
 
 @app.post("/open/file/{filename}")
 async def open_file(filename: str):
@@ -278,3 +297,7 @@ async def open_application_by_path(request: AppPathRequest):
         return {"success": True, "message": f"Launching application: {app_path}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to launch application: {str(e)}")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

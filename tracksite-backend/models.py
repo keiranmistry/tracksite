@@ -20,7 +20,7 @@ class Bookmark(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255))
-    url = Column(String(255), unique=True, index=True)
+    url = Column(String(255), index=True)  # Removed unique constraint
     folder_id = Column(Integer, ForeignKey('folders.id'))
     created_at = Column(DateTime, default=datetime.utcnow)
     folder = relationship("Folder", back_populates="bookmarks")
